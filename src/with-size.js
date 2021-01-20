@@ -1,10 +1,8 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/require-default-props */
-/* eslint-disable react/no-find-dom-node */
 
 import React, { Children, Component } from 'react'
-import ReactDOM from 'react-dom'
 import invariant from 'invariant'
 import { debounce, throttle } from 'throttle-debounce'
 import resizeDetector from './resize-detector'
@@ -159,6 +157,7 @@ function withSize(config = defaultConfig) {
 
     class SizeAwareComponent extends React.Component {
       static displayName = `SizeMe(${getDisplayName(WrappedComponent)})`
+      elementRef = React.createRef()
 
       domEl = null
 
@@ -224,7 +223,7 @@ function withSize(config = defaultConfig) {
         this.strategy === 'callback' ? this.callbackState : this.state
 
       handleDOMNode() {
-        const found = this.element && ReactDOM.findDOMNode(this.element)
+        const found = this.elementRef.current
 
         if (!found) {
           // If we previously had a dom node then we need to ensure that
@@ -246,10 +245,6 @@ function withSize(config = defaultConfig) {
         } else {
           // Do nothing 👍
         }
-      }
-
-      refCallback = element => {
-        this.element = element
       }
 
       hasSizeChanged = (current, next) => {
@@ -301,7 +296,7 @@ function withSize(config = defaultConfig) {
 
         return (
           <SizeMeRenderWrapper
-            explicitRef={this.refCallback}
+            explicitRef={this.elementRef}
             size={this.strategy === 'callback' ? null : size}
             disablePlaceholder={disablePlaceholder}
             {...this.props}
